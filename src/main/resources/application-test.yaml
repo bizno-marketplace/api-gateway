@@ -1,0 +1,14 @@
+# application-test.yml
+spring:
+  config:
+    activate:
+      on-profile: test
+    import: "optional:configserver:"
+  cloud:
+    config:
+      enabled: false
+      fail-fast: false
+
+eureka:
+  client:
+    enabled: false
