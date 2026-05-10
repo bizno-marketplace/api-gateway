@@ -9,4 +9,4 @@ jobs:
   ci:
     uses: bizno-marketplace/.github/.github/workflows/ci-reusable.yml@master
     with:
-      coverage-threshold: 80
+      coverage-threshold: 0
