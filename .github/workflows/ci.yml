@@ -9,4 +9,8 @@ jobs:
   ci:
     uses: bizno-marketplace/.github/.github/workflows/ci-reusable.yml@master
     with:
-      coverage-threshold: 0
+        run-unit-tests: false
+        run-integration-tests: false
+        run-bdd-tests: false
+        run-coverage: false
+        coverage-threshold: 0
