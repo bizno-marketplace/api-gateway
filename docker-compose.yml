@@ -9,6 +9,7 @@ services:
       # ASSUNÇÃO: confirma o nome real da propriedade/env var usada para
       # spring.config.import: configserver:... e ajusta se for diferente.
       - CONFIG_SERVER_URL=http://config-server:8888
+      - LOKI_URL=http://loki:3100
     ports:
       - "8080:8080"   # main port
       - "9080:9080"   # management port

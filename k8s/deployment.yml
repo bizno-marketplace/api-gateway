@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: bizno
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: api-gateway }
+  template:
+    metadata:
+      labels: { app: api-gateway }
+    spec:
+      containers:
+        - name: api-gateway
+          image: gervasioartur/api-gateway:v8-test
+          env:
+            - name: DISCOVERY_SERVER_URL
+              value: "http://discovery-server:8761/eureka/"
+            - name: CONFIG_SERVER_URL
+              value: "http://configserver:8888"
+            - name: LOKI_URL
+              value: "http://loki:3100"
+          ports:
+            - containerPort: 8080
+            - containerPort: 9080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: bizno
+spec:
+  selector: { app: api-gateway }
+  type: NodePort   # host access for local k3s; switch to LoadBalancer/Ingress on DOKS
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+      name: main
+    - port: 9080
+      targetPort: 9080
+      name: management
