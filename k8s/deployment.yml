@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: gervasioartur/api-gateway:v8-test
+          image: gervasioartur/api-gateway:970cb9c
           env:
             - name: DISCOVERY_SERVER_URL
               value: "http://discovery-server:8761/eureka/"
@@ -21,6 +21,8 @@ spec:
               value: "http://configserver:8888"
             - name: LOKI_URL
               value: "http://loki:3100"
+            - name: ZIPKIN_URL
+              value: "http://zipkin:9411"
           ports:
             - containerPort: 8080
             - containerPort: 9080
