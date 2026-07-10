@@ -1,9 +1,9 @@
 name: Api Gateway CI
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 jobs:
   ci:
@@ -14,3 +14,53 @@ jobs:
       run-bdd-tests: false
       run-coverage: false
       coverage-threshold: 0
+
+  deploy:
+    needs: ci
+    uses: bizno-marketplace/shared-workflows/.github/workflows/deploy.yml@master
+    with:
+      image-tag: ${{github.sha}}
+      image-name: ${{github.repository}}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      K8S_HOST: ${{ secrets.K8S_HOST }}
+      K8S_USERNAME: ${{ secrets.K8S_USERNAME }}
+      K8S_SSH_KEY: ${{ secrets.K8S_SSH_KEY }}
+
+
+name: Deploy
+
+on:
+  push:
+    branches: [main, master, develop, staging]
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: "Optional: deploy a specific tag instead of building from the current commit's SHA"
+        required: false
+        type: string
+
+jobs:
+  ci:
+    # ... your existing test/build job ...
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "placeholder for your CI job"
+
+  deploy:
+    needs: ci
+    # Maps the branch to a GitHub Environment. Each Environment has its
+    # own K8S_HOST (and other secrets, if they ever differ) configured
+    # separately — nothing else in this file changes per environment.
+    environment: ${{ github.ref_name == 'production' || github.ref_name == 'develop' || 'staging' }}
+    uses: bizno-marketplace/shared-workflows/.github/workflows/cd-reusable.yml@main
+    with:
+      image-name: auth-service
+      image-tag: ${{ inputs.image-tag || '' }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      K8S_HOST: ${{ secrets.K8S_HOST }}
+      K8S_USERNAME: ${{ secrets.K8S_USERNAME }}
+      K8S_SSH_KEY: ${{ secrets.K8S_SSH_KEY }}
